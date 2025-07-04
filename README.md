@@ -1,6 +1,6 @@
 # minewall
 
-A lightweight and configurable firewall solution for Minecraft servers.
+A simple firewall and server management setup script for Minecraft servers.
 
 by [angeliust](https://github.com/angeliust)
 
@@ -8,77 +8,76 @@ by [angeliust](https://github.com/angeliust)
 
 ## Overview
 
-**minewall** is a server-side firewall specifically designed for Minecraft servers. It helps server administrators protect their servers from unwanted connections, spam attacks, and unauthorized access, providing an additional layer of security and control.
+**minewall** provides a Bash script to quickly configure firewall rules and set up [PufferPanel](https://www.pufferpanel.com/) for Minecraft servers on Linux systems. This helps server administrators secure their Minecraft server ports and streamline management panel installation.
 
 ## Features
 
-- Easy to install and configure
-- Supports allowlists/denylists for players and IPs
-- Limits connections per IP to prevent brute-force or spam attacks
-- Customizable ban/kick messages
-- Lightweight: minimal impact on server performance
-- Compatible with major Minecraft server platforms (Spigot, Paper, etc.)
-- Logging of blocked/allowed connection attempts
+- Installs and configures `firewalld` to open Minecraft ports (default: 25565 TCP/UDP)
+- Automates the installation of PufferPanel, an open-source game server management panel
+- Sets up PufferPanel to start on boot and prompts to create an admin user
 
-## Installation
+## Requirements
 
-1. **Download** the latest release from the [releases page](https://github.com/angeliust/minewall/releases).
-2. **Place** the plugin `.jar` file into your server's `plugins` directory.
-3. **Restart** your Minecraft server.
+- Linux server with `sudo` privileges
+- Internet connection
 
-## Configuration
+## Installation and Usage
 
-After the first launch, a configuration file (`config.yml`) will be generated in the `plugins/minewall` directory.
+1. Clone this repository or download the `minewall.sh` file:
 
-Example configuration options:
+    ```bash
+    wget https://github.com/angeliust/minewall/raw/main/minewall.sh
+    chmod +x minewall.sh
+    ```
 
-```yaml
-max_connections_per_ip: 3
-whitelist:
-  - 127.0.0.1
-  - 192.168.1.10
-blacklist:
-  - 203.0.113.45
-kick_message: "You are not allowed to connect to this server."
+2. Run the script as root or with sudo:
+
+    ```bash
+    sudo ./minewall.sh
+    ```
+
+    The script will:
+    - Install `firewalld` and open the default Minecraft port (25565) for both TCP and UDP
+    - Install PufferPanel via its official repository and script
+    - Enable and start the PufferPanel service
+    - Prompt you to create a PufferPanel admin user
+
+## What does the script do?
+
+The core actions performed by `minewall.sh`:
+
+```shell
+apt install firewalld
+firewall-cmd --permanent --zone=public --add-port=25565/tcp
+firewall-cmd --permanent --zone=public --add-port=25565/udp
+firewall-cmd --reload
+curl -s https://packagecloud.io/install/repositories/pufferpanel/pufferpanel/script.deb.sh | sudo bash
+apt-get install pufferpanel
+systemctl enable pufferpanel
+systemctl start pufferpanel
+pufferpanel user add
 ```
 
-- **max_connections_per_ip**: Set the maximum simultaneous connections allowed from a single IP.
-- **whitelist/blacklist**: Control which IPs are allowed or denied.
-- **kick_message**: Custom message sent to blocked players.
+- **Firewall configuration:** Opens required Minecraft server ports.
+- **Panel setup:** Installs and starts PufferPanel for easy game server management.
 
-## Usage
+## Customization
 
-- The firewall works automatically based on your configuration.
-- Use server commands (if available) to update the whitelist/blacklist without restarting the server.
-- Monitor server logs for connection events.
+- To change the Minecraft port, edit the relevant `firewall-cmd` lines in `minewall.sh`.
+- You can add more ports or services as needed.
 
-## Commands
+## Security Note
 
-> _If your plugin provides any in-game or console commands, list them here._
-
-| Command                | Description                         | Permission        |
-|------------------------|-------------------------------------|-------------------|
-| `/minewall reload`     | Reload the minewall configuration   | `minewall.reload` |
-| `/minewall status`     | View current firewall status        | `minewall.status` |
+Always review scripts from the internet before running them, especially as root. This script is intended for fresh or test server environments.
 
 ## Contributing
 
-Contributions are welcome! If you have suggestions, bug reports, or want to contribute code, please:
-
-1. [Open an issue](https://github.com/angeliust/minewall/issues)
-2. Fork the repository
-3. Create a pull request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome! If you'd like to suggest improvements or report issues, please open an [issue](https://github.com/angeliust/minewall/issues) or submit a pull request.
 
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
-## Acknowledgements
-
-- Inspired by other Minecraft security plugins and community feedback.
-
 ---
 
-*Protect your Minecraft server with minewall!*
+*Secure and manage your Minecraft server in seconds with minewall!*
